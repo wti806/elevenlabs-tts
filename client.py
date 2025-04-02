@@ -8,11 +8,13 @@ import elevenlabs_pb2
 import elevenlabs_pb2_grpc
 
 
-SERVER_ADDRESS = "localhost:50051"
-
 SAMPLE_RATE = 24000
 DTYPE = 'int16'
 CHANNELS = 1
+
+_SERVER_HOSTNAME = 'elevenlabs-1006159354920.us-central1.run.app'
+_SERVER_PORT = 443
+_TARGET_ADDRESS = f'{_SERVER_HOSTNAME}:{_SERVER_PORT}'
 
 
 def generate_requests(voice_id: str, model_id: str):
@@ -104,17 +106,18 @@ def run_client(voice: str, model: str):
 
     channel = None
     try:
-        channel = grpc.insecure_channel(SERVER_ADDRESS)
+        credentials = grpc.ssl_channel_credentials()
 
+        # Create a secure channel
+        channel = grpc.secure_channel(_TARGET_ADDRESS, credentials)
+
+        # Optionally, you can wait for the channel to be ready (good practice)
         try:
-             print(f"[gRPC] Attempting to connect to server at {SERVER_ADDRESS}...")
-             grpc.channel_ready_future(channel).result(timeout=5)
-             print("[gRPC] Connected successfully!")
+            grpc.channel_ready_future(channel).result(timeout=10)
+            print("gRPC channel is ready.")
         except grpc.FutureTimeoutError:
-             print(f"[gRPC] Error: Connection timed out. Is the server running at {SERVER_ADDRESS}?", file=sys.stderr)
-             stop_playback_event.set() 
-             player_thread.join(timeout=1.0)
-             return
+            print("Timeout waiting for gRPC channel to be ready.")
+            return
 
         stub = elevenlabs_pb2_grpc.TextToSpeechStub(channel)
 
@@ -179,7 +182,6 @@ if __name__ == "__main__":
     default_model = "eleven_multilingual_v2"
 
     print("--- gRPC Text-to-Speech Client ---")
-    print(f"Server Target:      {SERVER_ADDRESS}")
     print(f"Selected Voice ID:  {default_voice}")
     print(f"Selected Model ID:  {default_model}")
 

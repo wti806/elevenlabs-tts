@@ -13,7 +13,9 @@ from elevenlabs.client import ElevenLabs
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 load_dotenv()
-_SERVER_ADDRESS = '[::]:50051'
+_PORT = os.environ.get('PORT', '50051')
+_SERVER_ADDRESS = f'[::]:{_PORT}'
+
 
 
 class TextToSpeechServicer(elevenlabs_pb2_grpc.TextToSpeechServicer):
