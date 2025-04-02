@@ -57,7 +57,7 @@ class TextToSpeechServicer(elevenlabs_pb2_grpc.TextToSpeechServicer):
                     voice=config.voice_id,
                     model=config.model_id,
                     stream=True,
-                    output_format="pcm_24000",
+                    output_format=config.output_format,
                 )
 
                 logging.info("Streaming audio from ElevenLabs client back to client...")
