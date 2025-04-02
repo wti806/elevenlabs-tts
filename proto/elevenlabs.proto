@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package elevenlabs;
+
+service TextToSpeech {
+    rpc StreamingSynthesize(stream StreamingSynthesizeRequest)
+      returns (stream StreamingSynthesizeResponse) {
+  }
+}
+
+message StreamingSynthesizeRequest {
+    oneof request {
+        Config config = 1;
+        Input input = 2;
+    }
+}
+
+message Config {
+    string voice_id = 1;
+    string model_id = 2;
+    string output_format = 3;
+}
+
+message Input {
+    string text = 1;
+}
+
+message StreamingSynthesizeResponse {
+    bytes audio_chunk = 1;
+}
